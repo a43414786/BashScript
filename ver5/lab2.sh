@@ -6,18 +6,21 @@ file=$(ls compressed_files)
 student_id=$(sort student_id)
 
 #Start make wrong_list
+echo Start make wrong_list
 [ -f "wrong_list" ] && rm wrong_list
 [ -f "missing_list" ] && rm missing_list
 for i in $file
 do
 	if [ ${i#*.} != "zip" ] && [ ${i#*.} != "rar" ] && [ ${i#*.} != "tar.gz" ];then
-		wrong_list="$wrong_list $i"
+		wrong_list="$wrong_list ${i%%.*}"
 	fi
 done
 echo $wrong_list > wrong_list
 #End make wrong_list
+echo End make wrong_list
 
 #Start make missing_list
+echo Start make missing_list
 mkdir temp
 for i in $student_id;
 do
@@ -37,6 +40,7 @@ done
 rm -r temp
 echo $missing_list > missing_list
 #End make missing_list
+echo End make missing_list
 
 #Function for classified files type
 classification(){
@@ -65,35 +69,42 @@ classification(){
 #Function for uncompress files
 uncompress(){
 	file=$(ls compressed_files/$1/*.$1)
-	echo $file
 	dst=compressed_files/$1
 	if [ ${1} = "zip" ];then
 		for i in $file
 		do
-			unzip $i -d $dst
+			unzip $i -d $dst > /dev/null
+			rm $i
 		done
 	elif [ ${1} = "rar" ];then
 		for i in $file
 		do
-			unrar x $i $dst
+			unrar x $i $dst > /dev/null
+			rm $i
 		done
 	elif [ ${1} = "tar.gz" ];then
 		for i in $file
 		do
-			tar -C $dst -xzvf $i
+			tar -C $dst -xzvf $i > /dev/null
+			rm $i
 		done
 	fi
 }
 
 #Start classified
+echo Start classified
 classification zip
 classification rar
 classification tar.gz
 classification unknown
 #End classified
+echo End classified
 
 #Start uncompress
+echo Start uncompress
 uncompress zip
 uncompress rar
 uncompress tar.gz
 #End uncompress
+echo End uncompress
+
